@@ -28,6 +28,8 @@
     float* volumes;
     GCDAsyncUdpSocket *udpSocket;
     long tag;
+    int numChannels;
+    int dataSize;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
@@ -39,6 +41,11 @@
 @property (nonatomic) Byte *byteData;// = (Byte*) malloc(l);
 @property (nonatomic) Byte *byteData2;// = (Byte*) malloc(l);
 
+//multichannel stuff
+@property (nonatomic) Byte *byteDataArray;
+@property (nonatomic) AudioBufferList *ablArray;
+@property (nonatomic) NSMutableArray* players;
+@property (nonatomic) AEChannelGroupRef* channels;
 
 @property (nonatomic) NSMutableData *mutableData;
 //@property (nonatomic) AudioBufferList *decodedAbl;
@@ -60,6 +67,8 @@
 - (NSData *) encodeAudioBufferList:(AudioBufferList *)abl;
 
 - (AudioBufferList *) decodeAudioBufferList: (NSData *) data;
+
+- (AudioBufferList *) decodeAudioBufferListMultiChannel: (NSData *) data;
 
 -(void) setupSocket;
 - (BOOL)textFieldShouldReturn:(UITextField *)textField;
