@@ -19,13 +19,10 @@
 //#import "MyAudioReceiver.h"
 #import "MyAudioPlayer.h"
 
+#import <dispatch/dispatch.h>
+
 @interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate> {
     @public
-    MyAudioPlayer *player1;
-    MyAudioPlayer *player2;
-    AEChannelGroupRef channel1;
-    AEChannelGroupRef channel2;
-    float* volumes;
     GCDAsyncUdpSocket *udpSocket;
     long tag;
     int numChannels;
@@ -66,7 +63,7 @@
 
 - (AudioBufferList *) decodeAudioBufferList: (NSData *) data;
 
-- (AudioBufferList *) decodeAudioBufferListMultiChannel: (NSData *) data;
+- (void) decodeAudioBufferListMultiChannel: (NSData *) data;
 
 -(void) initializeAll;
 

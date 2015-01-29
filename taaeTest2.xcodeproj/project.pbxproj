@@ -209,6 +209,7 @@
 				TargetAttributes = {
 					C53917391A528743007649DE = {
 						CreatedOnToolsVersion = 6.1.1;
+						DevelopmentTeam = QKNZ2N2P2F;
 					};
 					C53917521A528743007649DE = {
 						CreatedOnToolsVersion = 6.1.1;
@@ -422,7 +423,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Sander Valstar (XXHB2HMMYT)";
 				INFOPLIST_FILE = taaeTest2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -436,7 +437,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Sander Valstar (XXHB2HMMYT)";
 				INFOPLIST_FILE = taaeTest2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
