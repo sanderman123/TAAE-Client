@@ -16,18 +16,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="5tJ-PJ-1ji">
-                                <rect key="frame" x="14" y="285" width="118" height="31"/>
-                                <connections>
-                                    <action selector="slider1ValueChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="GSB-Bm-FxQ"/>
-                                </connections>
-                            </slider>
-                            <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="jeZ-so-wvu">
-                                <rect key="frame" x="147" y="285" width="118" height="31"/>
-                                <connections>
-                                    <action selector="slider2ValueChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="OxS-UY-sCn"/>
-                                </connections>
-                            </slider>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="10.0.1.8" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="PCK-pW-uGQ">
                                 <rect key="frame" x="16" y="38" width="196" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -60,8 +48,6 @@
                     </view>
                     <connections>
                         <outlet property="btnSend" destination="7QL-mG-ETM" id="skk-il-1bJ"/>
-                        <outlet property="slider1" destination="5tJ-PJ-1ji" id="VVH-tr-lPP"/>
-                        <outlet property="slider2" destination="jeZ-so-wvu" id="eRP-9B-cIE"/>
                         <outlet property="tfIPAddress" destination="PCK-pW-uGQ" id="AOT-VJ-v1s"/>
                         <outlet property="tfMessage" destination="flt-34-FMq" id="S5l-T0-jG4"/>
                         <outlet property="tfPort" destination="4vE-1c-yD9" id="1wz-wb-XjJ"/>

@@ -31,6 +31,7 @@
     int numChannels;
     int dataSize;
     int ablSize;
+    NSMutableArray *sliders;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
@@ -52,10 +53,6 @@
 //@property (nonatomic) AudioBufferList *decodedAbl;
 
 //@property  MyAudioPlayer *player1;
-@property (weak, nonatomic) IBOutlet UISlider *slider1;
-- (IBAction)slider1ValueChanged:(id)sender;
-@property (weak, nonatomic) IBOutlet UISlider *slider2;
-- (IBAction)slider2ValueChanged:(id)sender;
 
 @property (weak, nonatomic) IBOutlet UIButton *btnSend;
 - (IBAction)btnSendClicked:(id)sender;
@@ -63,7 +60,7 @@
 @property (weak, nonatomic) IBOutlet UITextField *tfPort;
 @property (weak, nonatomic) IBOutlet UITextField *tfMessage;
 
-
+-(void)sliderAction:(UISlider*)sender;
 
 - (NSData *) encodeAudioBufferList:(AudioBufferList *)abl;
 
