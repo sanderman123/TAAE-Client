@@ -30,6 +30,7 @@
     long tag;
     int numChannels;
     int dataSize;
+    int ablSize;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
@@ -69,6 +70,8 @@
 - (AudioBufferList *) decodeAudioBufferList: (NSData *) data;
 
 - (AudioBufferList *) decodeAudioBufferListMultiChannel: (NSData *) data;
+
+-(void) initializeAll;
 
 -(void) setupSocket;
 - (BOOL)textFieldShouldReturn:(UITextField *)textField;
