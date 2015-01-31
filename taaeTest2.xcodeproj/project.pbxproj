@@ -15,6 +15,7 @@
 		C539174B1A528743007649DE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C539174A1A528743007649DE /* Images.xcassets */; };
 		C539174E1A528743007649DE /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = C539174C1A528743007649DE /* LaunchScreen.xib */; };
 		C539175A1A528743007649DE /* taaeTest2Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = C53917591A528743007649DE /* taaeTest2Tests.m */; };
+		C5815B0B1A7C952E00BB6D90 /* AudioBufferManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C5815B0A1A7C952E00BB6D90 /* AudioBufferManager.m */; };
 		C5903ECF1A65009B00168A69 /* MyAudioReceiver.m in Sources */ = {isa = PBXBuildFile; fileRef = C5903ECE1A65009B00168A69 /* MyAudioReceiver.m */; };
 		C5903ED21A65061600168A69 /* MyAudioPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = C5903ED11A65061600168A69 /* MyAudioPlayer.mm */; };
 		C98951C13861FACD19E31970 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DE1B6725A47810E4651F388 /* libPods.a */; };
@@ -48,6 +49,8 @@
 		C53917531A528743007649DE /* taaeTest2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = taaeTest2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C53917581A528743007649DE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C53917591A528743007649DE /* taaeTest2Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = taaeTest2Tests.m; sourceTree = "<group>"; };
+		C5815B091A7C952E00BB6D90 /* AudioBufferManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioBufferManager.h; sourceTree = "<group>"; };
+		C5815B0A1A7C952E00BB6D90 /* AudioBufferManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioBufferManager.m; sourceTree = "<group>"; };
 		C5903ECD1A65009B00168A69 /* MyAudioReceiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyAudioReceiver.h; sourceTree = "<group>"; };
 		C5903ECE1A65009B00168A69 /* MyAudioReceiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyAudioReceiver.m; sourceTree = "<group>"; };
 		C5903ED01A65061600168A69 /* MyAudioPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyAudioPlayer.h; sourceTree = "<group>"; };
@@ -115,6 +118,8 @@
 				C53917421A528743007649DE /* AppDelegate.m */,
 				C53917441A528743007649DE /* ViewController.h */,
 				C53917451A528743007649DE /* ViewController.mm */,
+				C5815B091A7C952E00BB6D90 /* AudioBufferManager.h */,
+				C5815B0A1A7C952E00BB6D90 /* AudioBufferManager.m */,
 				C53917471A528743007649DE /* Main.storyboard */,
 				C539174A1A528743007649DE /* Images.xcassets */,
 				C539174C1A528743007649DE /* LaunchScreen.xib */,
@@ -297,6 +302,7 @@
 				C53917461A528743007649DE /* ViewController.mm in Sources */,
 				C5903ECF1A65009B00168A69 /* MyAudioReceiver.m in Sources */,
 				C53917431A528743007649DE /* AppDelegate.m in Sources */,
+				C5815B0B1A7C952E00BB6D90 /* AudioBufferManager.m in Sources */,
 				C53917401A528743007649DE /* main.m in Sources */,
 				C50614311A6A6668002ACFEA /* GCDAsyncUdpSocket.m in Sources */,
 				C5903ED21A65061600168A69 /* MyAudioPlayer.mm in Sources */,

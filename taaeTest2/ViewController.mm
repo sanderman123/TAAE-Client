@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-
+#import "AudioBufferManager.h"
 @interface ViewController ()
 
 @end
@@ -50,8 +50,21 @@
 }
 -(void)initializeAll{
     //    numChannels = 8;
+    
     dataSize = 512;
     ablSize = sizeof(AudioBufferList);
+    
+    ablNSArray = [[NSMutableArray alloc]init];
+    
+    for (int i = 0; i< numChannels; i++) {
+        AudioBufferManager *ablManager = [[AudioBufferManager alloc]init];
+        ablManager.buffer =AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
+        
+        //AudioBufferList *tmp = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);//(AudioBufferList *) malloc(ablSize*2);
+        [ablNSArray addObject:ablManager];
+    }
+    
+    
     
     //Make variables public so they can be reused
     self.abl = (AudioBufferList*) malloc(sizeof(AudioBufferList));
@@ -59,10 +72,10 @@
     //self.abl = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], 1024);
     self.abl1 = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
     self.abl2 = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
-    self.byteData = (Byte*) malloc(dataSize); //should maybe be a different value in the future
-    self.byteData2 = (Byte*) malloc(dataSize); //should maybe be a different value in the future
+//    self.byteData = (Byte*) malloc(dataSize); //should maybe be a different value in the future
+//    self.byteData2 = (Byte*) malloc(dataSize); //should maybe be a different value in the future
     self.byteDataArray = (Byte *) malloc(dataSize*numChannels);
-    self.ablArray = (AudioBufferList *) malloc(ablSize*numChannels);
+//    self.ablArray = (AudioBufferList *) malloc(ablSize*numChannels*2);
     
     //    self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription] inputEnabled: YES];
     //    _audioController.preferredBufferDuration = 0.005;
@@ -96,7 +109,7 @@
         [slider setBackgroundColor:[UIColor clearColor]];
         slider.minimumValue = 0.0;
         slider.maximumValue = 1.0;
-        slider.continuous = NO;
+        slider.continuous = YES;
         slider.value = 0.5;
         slider.tag = i;
         [sliders addObject:slider];
@@ -270,8 +283,13 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
         NSUInteger startPos = 0;
         //Calculate the length of the subranges
         NSUInteger rangeLen = dataLen / numChannels;
+        NSLog(@"%lu,%d ->rangelen :  %lu %lu",(unsigned long)dataLen,numChannels,(unsigned long)rangeLen, sizeof(_ablArray));
         //Create a uint32 version of the rangelength
         UInt32 rLen = (UInt32) rangeLen;
+        
+        
+        
+        
         for(int i = 0; i < numChannels; i++){
             NSRange range = NSMakeRange(startPos, rangeLen);
             NSData *subdata = [data subdataWithRange:range];
@@ -283,15 +301,26 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
             memcpy(&self.byteDataArray[dataSize*i], [subdata bytes], rLen);
 //            self.abl->mBuffers[i].mData = &self.byteDataArray[dataSize*i];
             
-            self.ablArray[ablSize*i].mNumberBuffers = 2;
-            self.ablArray[ablSize*i].mBuffers[0].mDataByteSize = rLen;
-            self.ablArray[ablSize*i].mBuffers[0].mNumberChannels = 1;
-            self.ablArray[ablSize*i].mBuffers[0].mData = &self.byteDataArray[dataSize*i];
-//            self.ablArray[16*i].mBuffers[1].mDataByteSize = rLen;
-//            self.ablArray[16*i].mBuffers[1].mNumberChannels = 1;
-//            self.ablArray[16*i].mBuffers[1].mData = &self.byteDataArray[dataSize*i];
-            self.ablArray[ablSize*i].mBuffers[1] = self.ablArray[ablSize*i].mBuffers[0];
+            AudioBufferManager *ablManager =[ablNSArray objectAtIndex:i];
             
+//            self.ablArray[ablSize*i].mNumberBuffers = 2;
+//            self.ablArray[ablSize*i].mBuffers[0].mDataByteSize = rLen;
+//            self.ablArray[ablSize*i].mBuffers[0].mNumberChannels = 1;
+//            self.ablArray[ablSize*i].mBuffers[0].mData = &self.byteDataArray[dataSize*i];
+////            self.ablArray[16*i].mBuffers[1].mDataByteSize = rLen;
+////            self.ablArray[16*i].mBuffers[1].mNumberChannels = 1;
+////            self.ablArray[16*i].mBuffers[1].mData = &self.byteDataArray[dataSize*i];
+//            self.ablArray[ablSize*i].mBuffers[1] = self.ablArray[ablSize*i].mBuffers[0];
+            ablManager.buffer->mNumberBuffers = 2;
+            ablManager.buffer->mBuffers[0].mDataByteSize = rLen;
+            ablManager.buffer->mBuffers[0].mNumberChannels = 1;
+            ablManager.buffer->mBuffers[0].mData = &self.byteDataArray[dataSize*i];
+            //            self.ablArray[16*i].mBuffers[1].mDataByteSize = rLen;
+            //            self.ablArray[16*i].mBuffers[1].mNumberChannels = 1;
+            //            self.ablArray[16*i].mBuffers[1].mData = &self.byteDataArray[dataSize*i];
+            ablManager.buffer->mBuffers[1] = ablManager.buffer->mBuffers[0];
+
+            [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:ablManager.buffer];
             
             startPos += rangeLen;
         }
@@ -309,7 +338,7 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
     {
         NSLog(@"RECV: %@", msg);
         NSArray *array = [msg componentsSeparatedByString:@":"];
-        numChannels = [array[0] integerValue];
+        numChannels = (int)[[array objectAtIndex:0] integerValue];
         [self initializeAll];
     }
     else
@@ -346,9 +375,13 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
 //        [self->player1 addToBufferWithoutTimeStampAudioBufferList:self.abl1];
 //        [self->player2 addToBufferWithoutTimeStampAudioBufferList:self.abl2];
         
-            for (int i = 0; i < numChannels; i++) {
-                [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[ablSize*i]];
-            }
+//            for (int i = 0; i < numChannels; i++) {
+////                [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[ablSize*i]];
+//                AudioBufferManager *ablManager = [ablNSArray objectAtIndex:i];
+//                [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:ablManager.buffer];
+//                
+//                
+//            }
 
 //        [[self.players objectAtIndex:0] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[0]];
 //        [[self.players objectAtIndex:1] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[ablSize*7]];
@@ -358,7 +391,7 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
         uint16_t port = 0;
         [GCDAsyncUdpSocket getHost:&host port:&port fromAddress:address];
         
-        NSLog(@"RECV: Unknown message from: %@:%hu", host, port);
+        //NSLog(@"RECV: Unknown message from: %@:%hu", host, port);
     }
     
 }

@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "TPCircularBuffer+AudioBufferList.h"
 @interface AudioBufferManager : NSObject
 
+@property (assign) AudioBufferList *buffer;
 @end

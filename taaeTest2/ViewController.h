@@ -29,6 +29,7 @@
     int dataSize;
     int ablSize;
     NSMutableArray *sliders;
+    NSMutableArray *ablNSArray;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
