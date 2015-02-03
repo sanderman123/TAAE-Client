@@ -26,10 +26,13 @@
     GCDAsyncUdpSocket *udpSocket;
     long tag;
     int numChannels;
+    NSMutableArray *channelNames;
+    NSMutableArray *channelNameLabels;
     int dataSize;
     int ablSize;
     NSMutableArray *sliders;
     NSMutableArray *ablNSArray;
+    bool initialized;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
@@ -67,6 +70,8 @@
 - (void) decodeAudioBufferListMultiChannel: (NSData *) data;
 
 -(void) initializeAll;
+
+- (void) updateChannelNames:(NSArray*)names;
 
 -(void) setupSocket;
 - (BOOL)textFieldShouldReturn:(UITextField *)textField;

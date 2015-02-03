@@ -17,7 +17,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
+    initialized = false;
     [self setupSocket];
 }
 
@@ -96,14 +96,20 @@
     
     self.players = [[NSMutableArray alloc] init];
     self.channels = (AEChannelGroupRef*)malloc(sizeof(AEChannelGroupRef)*numChannels*2);
+    channelNameLabels = [[NSMutableArray alloc] init];
     
     for(int i = 0; i < numChannels; i++){
         //Initialize channel volume slider numbers
         UILabel *sliderNumber = [[UILabel alloc] initWithFrame:CGRectMake(20.0, 147.0+i*60.0, 10.0, 25.0)];
         sliderNumber.text = [NSString stringWithFormat:@"%i",i+1];
         [self.view addSubview:sliderNumber];
+        //Initialize channel names
+        UILabel *channelName = [[UILabel alloc] initWithFrame:CGRectMake(40.0, 130.0+i*60.0, 200.0, 25.0)];
+        channelName.text = [channelNames objectAtIndex:i];
+        [channelNameLabels addObject:channelName];
+        [self.view addSubview:(UILabel*)[channelNameLabels objectAtIndex:i]];
         //Initialize channel volume sliders
-        CGRect frame = CGRectMake(40.0, 150.0+i*60, 200, 20.0);
+        CGRect frame = CGRectMake(40.0, 150.0+i*60, 200.0, 20.0);
         UISlider *slider = [[UISlider alloc] initWithFrame:frame];
         [slider addTarget:self action:@selector(sliderAction:) forControlEvents:UIControlEventValueChanged];
         [slider setBackgroundColor:[UIColor clearColor]];
@@ -124,7 +130,7 @@
         //Initialize channel volumes
         [self.audioController setVolume:vol forChannelGroup:self.channels[i]];
     }
-
+    initialized = true;
 }
 
 static void inputCallback(__unsafe_unretained ViewController *THIS,
@@ -338,60 +344,20 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
     {
         NSLog(@"RECV: %@", msg);
         NSArray *array = [msg componentsSeparatedByString:@":"];
-        numChannels = (int)[[array objectAtIndex:0] integerValue];
-        [self initializeAll];
-    }
-    else
-    {
-        //We received audio data, so lets play it!
-//        AudioBufferList *bufferList = [self decodeAudioBufferList:data];
-        //dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        if(!initialized){
+            numChannels = (int)array.count;
+            channelNames = [[NSMutableArray alloc]init];
+            [channelNames addObjectsFromArray:array];
+        
+            [self initializeAll];
+        } else {
+            [self updateChannelNames:array];
+        }
+    } else {
         [self decodeAudioBufferListMultiChannel:data];
-          //      });
-        
-//----------------Add Audio BufferList to TAAE --------------
-        //Make 2 stereo channels out of 2 mono channels
-//        AudioBuffer ab1 = bufferList->mBuffers[0];//audio->mBuffers[0];
-//        AudioBuffer ab2 = bufferList->mBuffers[7];//audio->mBuffers[1];
-//        
-//        self.ablArray[0].mNumberBuffers = 2;
-//        self.ablArray[0].mBuffers[0] = ab1;
-//        self.ablArray[0].mBuffers[1] = ab1;
-//        self.ablArray[16].mNumberBuffers = 2;
-//        self.ablArray[16].mBuffers[0] = ab2;
-//        self.ablArray[16].mBuffers[1] = ab2;
-
-//        self.abl1->mNumberBuffers = 2;
-//        self.abl1->mBuffers[0] = ab1;
-//        self.abl1->mBuffers[1] = ab1;
-//        self.abl2->mNumberBuffers = 2;
-//        self.abl2->mBuffers[0] = ab2;
-//        self.abl2->mBuffers[1] = ab2;
-        
-//      Add a timestamp later
-//        [self->player1 addToBufferAudioBufferList:self.abl1 frames:frames timestamp:time];
-//        [self->player2 addToBufferAudioBufferList:self.abl2 frames:frames timestamp:time];
-////
-//        [self->player1 addToBufferWithoutTimeStampAudioBufferList:self.abl1];
-//        [self->player2 addToBufferWithoutTimeStampAudioBufferList:self.abl2];
-        
-//            for (int i = 0; i < numChannels; i++) {
-////                [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[ablSize*i]];
-//                AudioBufferManager *ablManager = [ablNSArray objectAtIndex:i];
-//                [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:ablManager.buffer];
-//                
-//                
-//            }
-
-//        [[self.players objectAtIndex:0] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[0]];
-//        [[self.players objectAtIndex:1] addToBufferWithoutTimeStampAudioBufferList:&self.ablArray[ablSize*7]];
-        
-        
         NSString *host = nil;
         uint16_t port = 0;
         [GCDAsyncUdpSocket getHost:&host port:&port fromAddress:address];
-        
-        //NSLog(@"RECV: Unknown message from: %@:%hu", host, port);
     }
     
 }
@@ -426,6 +392,15 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
 
 -(void)clickedBackground{
     [self.view endEditing:YES];
+}
+
+-(void)updateChannelNames:(NSArray *)names{
+    for (int i = 0; i < numChannels; i++) {
+        [channelNames replaceObjectAtIndex:i withObject:[names objectAtIndex:i]];
+        ((UILabel*)[channelNameLabels objectAtIndex:i]).text = [names objectAtIndex:i];
+        [(UILabel*)[channelNameLabels objectAtIndex:i] setNeedsDisplay];
+    }
+    [self.view reloadInputViews];
 }
 
 
