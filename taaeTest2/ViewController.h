@@ -21,18 +21,22 @@
 
 #import <dispatch/dispatch.h>
 
-@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate> {
+@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
     @public
     GCDAsyncUdpSocket *udpSocket;
     long tag;
     int numChannels;
     NSMutableArray *channelNames;
     NSMutableArray *channelNameLabels;
+    NSMutableArray *channelImageViews;
+    UIImage *defaultImage;
     int dataSize;
     int ablSize;
     NSMutableArray *sliders;
     NSMutableArray *ablNSArray;
     bool initialized;
+    int imageFlag;
+    UIImageView *lastImageTouched;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;

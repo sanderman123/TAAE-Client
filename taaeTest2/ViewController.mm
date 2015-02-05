@@ -18,6 +18,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     initialized = false;
+    numChannels = 0;
+    imageFlag = -1;
     [self setupSocket];
 }
 
@@ -55,6 +57,9 @@
     ablSize = sizeof(AudioBufferList);
     
     ablNSArray = [[NSMutableArray alloc]init];
+    channelImageViews = [[NSMutableArray alloc]init];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"music-note" ofType:@"png"];
+    defaultImage = [[UIImage alloc] initWithContentsOfFile:path];
     
     for (int i = 0; i< numChannels; i++) {
         AudioBufferManager *ablManager = [[AudioBufferManager alloc]init];
@@ -99,6 +104,16 @@
     channelNameLabels = [[NSMutableArray alloc] init];
     
     for(int i = 0; i < numChannels; i++){
+        //Initialize channel images
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(250.0, 130.0+i*60, 50.0, 50.0)];
+        [imageView setImage:defaultImage];
+        imageView.userInteractionEnabled = YES;
+        UITapGestureRecognizer *gr = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                             action:@selector(handleTap:)];
+        [imageView addGestureRecognizer:gr];
+        [channelImageViews addObject:imageView];
+        [self.view addSubview:[channelImageViews objectAtIndex:i]];
+        
         //Initialize channel volume slider numbers
         UILabel *sliderNumber = [[UILabel alloc] initWithFrame:CGRectMake(20.0, 147.0+i*60.0, 10.0, 25.0)];
         sliderNumber.text = [NSString stringWithFormat:@"%i",i+1];
@@ -130,6 +145,7 @@
         //Initialize channel volumes
         [self.audioController setVolume:vol forChannelGroup:self.channels[i]];
     }
+    
     initialized = true;
 }
 
@@ -337,28 +353,46 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
 }
 
 -(void)udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address
-    withFilterContext:(id)filterContext{
+withFilterContext:(id)filterContext{
     //For now see the data as text
-    NSString *msg = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    if (msg)
-    {
-        NSLog(@"RECV: %@", msg);
-        NSArray *array = [msg componentsSeparatedByString:@":"];
-        if(!initialized){
-            numChannels = (int)array.count;
-            channelNames = [[NSMutableArray alloc]init];
-            [channelNames addObjectsFromArray:array];
-        
-            [self initializeAll];
+    
+//    if(imageFlag != -1){
+//        //Update picture of channel with number pictureFlag
+//        UIImage *image = [[UIImage alloc]initWithData: data];
+//        [((UIImageView*)[channelImageViews objectAtIndex:imageFlag]) setImage:image];
+//        [self.view reloadInputViews];
+//        imageFlag = -1;
+//    } else {
+        NSString *msg = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        if (msg)
+        {
+            NSLog(@"RECV: %@", msg);
+            
+            NSArray *array = [msg componentsSeparatedByString:@":"];
+            if(!initialized){
+                numChannels = (int)array.count;
+                channelNames = [[NSMutableArray alloc]init];
+                [channelNames addObjectsFromArray:array];
+                
+                [self initializeAll];
+            } else if ((int)array.count == numChannels){
+                [self updateChannelNames:array];
+            } else if ([[array objectAtIndex:0] isEqual:@"image"]){
+                //Initialize standard image already on the phone
+                int index = [[array objectAtIndex:1] integerValue];
+                NSString *path = [[NSBundle mainBundle] pathForResource:[array objectAtIndex:2] ofType:[array objectAtIndex:3]];
+                UIImage *image = [[UIImage alloc] initWithContentsOfFile:path];
+                [[channelImageViews objectAtIndex:index] setImage:image];
+                [self.view reloadInputViews];
+            }
+            
         } else {
-            [self updateChannelNames:array];
+            [self decodeAudioBufferListMultiChannel:data];
+            NSString *host = nil;
+            uint16_t port = 0;
+            [GCDAsyncUdpSocket getHost:&host port:&port fromAddress:address];
         }
-    } else {
-        [self decodeAudioBufferListMultiChannel:data];
-        NSString *host = nil;
-        uint16_t port = 0;
-        [GCDAsyncUdpSocket getHost:&host port:&port fromAddress:address];
-    }
+//    }
     
 }
 
@@ -384,7 +418,6 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
     NSLog(@"Socket Ready");
 }
 
-
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     return YES;
@@ -392,6 +425,32 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
 
 -(void)clickedBackground{
     [self.view endEditing:YES];
+}
+
+- (void)handleTap:(UITapGestureRecognizer *)gr {
+    NSLog(@"Touched!");
+
+//    gr.view
+    lastImageTouched = (UIImageView*)gr.view;
+    
+    UIImagePickerController *imagePickerController = [[UIImagePickerController alloc] init];
+    imagePickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    imagePickerController.delegate = self;
+    [self presentViewController:imagePickerController animated:YES completion:nil];
+    
+}
+
+// This method is called when an image has been chosen from the library or taken from the camera.
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
+{
+    //You can retrieve the actual UIImage
+    UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
+    [lastImageTouched setImage:image];
+    //Or you can get the image url from AssetsLibrary
+    NSURL *path = [info valueForKey:UIImagePickerControllerReferenceURL];
+    
+    [picker dismissViewControllerAnimated:YES completion:^{
+    }];
 }
 
 -(void)updateChannelNames:(NSArray *)names{
