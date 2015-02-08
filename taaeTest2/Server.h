@@ -41,7 +41,7 @@ typedef enum {
     kServerOutputStreamReachedCapacity = 5 // should be able to try again 'later'
 } ServerErrorCode;
 
-@interface Server : NSObject {
+@interface Server : NSObject <NSNetServiceDelegate, NSStreamDelegate, NSNetServiceBrowserDelegate>{
     NSString *_domain; // the bonjour domain
     NSString *_protocol; // the bonjour protocol
     NSString *_name; // the bonjour name

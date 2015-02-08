@@ -285,6 +285,7 @@ static void SocketAcceptedConnectionCallBack(CFSocketRef socket,
 #pragma mark NSNetServiceDelegate methods
 
 - (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
+    NSLog(@"test");
     [self.currentlyResolvingService stop];
     self.currentlyResolvingService = nil;
 }

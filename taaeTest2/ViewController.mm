@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "AudioBufferManager.h"
+#include <arpa/inet.h>
 @interface ViewController ()
 
 @end
@@ -451,13 +452,71 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
 }
 
 - (void)serviceAdded:(NSNetService *)service moreComing:(BOOL)more {
-//    [serverBrowserVC addService:service moreComing:more];
-    NSLog(@"Added a service: %@", [service name]);
+
+    NSLog(@"Added a service: %@, %li", [service name], [service port]);
+    
+    NetReslover = service;
+    NetReslover.delegate = self;
+    [NetReslover resolveWithTimeout:0.0];
+    
+    //direct connect to the server
+//    [BonjourServer connectToRemoteService:service];
+
 }
 
 - (void)serviceRemoved:(NSNetService *)service moreComing:(BOOL)more {
 //    [serverBrowserVC removeService:service moreComing:more];
     NSLog(@"Removed a service: %@", [service name]);
+}
+
+#pragma mark NSNetServiceDelegate methods
+
+- (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict {
+    NSLog(@"test");
+    [NetReslover stop];
+    NetReslover = nil;
+    
+}
+
+- (void)netServiceDidResolveAddress:(NSNetService *)service {
+    
+    char addressBuffer[INET6_ADDRSTRLEN];
+    
+    for (NSData *data in service.addresses)
+    {
+        memset(addressBuffer, 0, INET6_ADDRSTRLEN);
+        
+        typedef union {
+            struct sockaddr sa;
+            struct sockaddr_in ipv4;
+            struct sockaddr_in6 ipv6;
+        } ip_socket_address;
+        
+        ip_socket_address *socketAddress = (ip_socket_address *)[data bytes];
+        
+        if (socketAddress && (socketAddress->sa.sa_family == AF_INET || socketAddress->sa.sa_family == AF_INET6))
+        {
+            const char *addressStr = inet_ntop(
+                                               socketAddress->sa.sa_family,
+                                               (socketAddress->sa.sa_family == AF_INET ? (void *)&(socketAddress->ipv4.sin_addr) : (void *)&(socketAddress->ipv6.sin6_addr)),
+                                               addressBuffer,
+                                               sizeof(addressBuffer));
+            
+            int port = ntohs(socketAddress->sa.sa_family == AF_INET ? socketAddress->ipv4.sin_port : socketAddress->ipv6.sin6_port);
+            
+            if (addressStr && port)
+            {
+                NSLog(@"Found service at %s:%d", addressStr, port);
+            }
+        }
+    }
+    
+    assert(service == NetReslover);
+    
+    [NetReslover stop];
+    NetReslover = nil;
+    
+//    [self _remoteServiceResolved:service];
 }
 
 

@@ -21,7 +21,7 @@
 #import "Server.h"
 #import <dispatch/dispatch.h>
 
-@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate,ServerDelegate> {
+@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate,ServerDelegate, NSNetServiceDelegate> {
     @public
     GCDAsyncUdpSocket *udpSocket;
     long tag;
@@ -36,6 +36,7 @@
     
     //Bonjourserver
     Server *BonjourServer;
+    NSNetService *NetReslover;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
