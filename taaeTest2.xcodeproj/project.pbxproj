@@ -19,6 +19,7 @@
 		C5903ECF1A65009B00168A69 /* MyAudioReceiver.m in Sources */ = {isa = PBXBuildFile; fileRef = C5903ECE1A65009B00168A69 /* MyAudioReceiver.m */; };
 		C5903ED21A65061600168A69 /* MyAudioPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = C5903ED11A65061600168A69 /* MyAudioPlayer.mm */; };
 		C98951C13861FACD19E31970 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DE1B6725A47810E4651F388 /* libPods.a */; };
+		E76D0CA21A8749DA00F8FDAB /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = E76D0CA11A8749DA00F8FDAB /* Server.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,8 @@
 		C5903ED01A65061600168A69 /* MyAudioPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyAudioPlayer.h; sourceTree = "<group>"; };
 		C5903ED11A65061600168A69 /* MyAudioPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MyAudioPlayer.mm; sourceTree = "<group>"; };
 		DC897AE9DB9D24F835746159 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
+		E76D0CA01A8749DA00F8FDAB /* Server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Server.h; sourceTree = "<group>"; };
+		E76D0CA11A8749DA00F8FDAB /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Server.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +111,8 @@
 		C539173C1A528743007649DE /* taaeTest2 */ = {
 			isa = PBXGroup;
 			children = (
+				E76D0CA01A8749DA00F8FDAB /* Server.h */,
+				E76D0CA11A8749DA00F8FDAB /* Server.m */,
 				C506142F1A6A6668002ACFEA /* GCDAsyncUdpSocket.h */,
 				C50614301A6A6668002ACFEA /* GCDAsyncUdpSocket.m */,
 				C5903ECD1A65009B00168A69 /* MyAudioReceiver.h */,
@@ -301,6 +306,7 @@
 			files = (
 				C53917461A528743007649DE /* ViewController.mm in Sources */,
 				C5903ECF1A65009B00168A69 /* MyAudioReceiver.m in Sources */,
+				E76D0CA21A8749DA00F8FDAB /* Server.m in Sources */,
 				C53917431A528743007649DE /* AppDelegate.m in Sources */,
 				C5815B0B1A7C952E00BB6D90 /* AudioBufferManager.m in Sources */,
 				C53917401A528743007649DE /* main.m in Sources */,
@@ -430,7 +436,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Sander Valstar (XXHB2HMMYT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Shou Jesse (993XJGYVN9)";
 				INFOPLIST_FILE = taaeTest2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -444,7 +450,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Sander Valstar (XXHB2HMMYT)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Shou Jesse (993XJGYVN9)";
 				INFOPLIST_FILE = taaeTest2/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";

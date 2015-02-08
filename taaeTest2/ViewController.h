@@ -18,10 +18,10 @@
 
 //#import "MyAudioReceiver.h"
 #import "MyAudioPlayer.h"
-
+#import "Server.h"
 #import <dispatch/dispatch.h>
 
-@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate> {
+@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate,ServerDelegate> {
     @public
     GCDAsyncUdpSocket *udpSocket;
     long tag;
@@ -33,6 +33,9 @@
     NSMutableArray *sliders;
     NSMutableArray *ablNSArray;
     bool initialized;
+    
+    //Bonjourserver
+    Server *BonjourServer;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
