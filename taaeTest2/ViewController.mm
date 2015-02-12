@@ -20,7 +20,8 @@
     initialized = false;
     numChannels = 0;
     imageFlag = -1;
-    [self setupSocket];
+//    [self setupSocket];
+    [self setupTCPSocket];
 }
 
 -(void)sliderAction:(UISlider*)sender
@@ -85,11 +86,13 @@
     //    self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription] inputEnabled: YES];
     //    _audioController.preferredBufferDuration = 0.005;
     //
-    self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleavedFloatStereoAudioDescription] inputEnabled:YES];
+    self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleavedFloatStereoAudioDescription] inputEnabled:NO];
 //            _audioController.preferredBufferDuration = 0.005;
     _audioController.preferredBufferDuration = 0.0029;
 //    _audioController.preferredBufferDuration = 0.00145;
-    
+//    [UIDevice currentDevice].proximityMonitoringEnabled = YES;
+    [[UIDevice currentDevice] setProximityMonitoringEnabled:YES];
+    NSLog(@"Proximity Monitoring Enabled? %@ ",    [UIDevice currentDevice].proximityMonitoringEnabled ? @"YES" : @"NO");
     
     NSError *error = [NSError alloc];
     if(![self.audioController start:&error]){
@@ -145,6 +148,32 @@
         //Initialize channel volumes
         [self.audioController setVolume:vol forChannelGroup:self.channels[i]];
     }
+//    [self.audioController setPan:1.0 forChannelGroup:self.channels[5]];
+//    [self.audioController setMuted:YES forChannelGroup:self.channels[5]];
+    
+    AudioComponentDescription component
+    = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
+                                      kAudioUnitType_Effect,
+                                      kAudioUnitSubType_Reverb2);
+    error = NULL;
+    AEAudioUnitFilter *reverb = [[AEAudioUnitFilter alloc]
+                   initWithComponentDescription:component
+                   audioController:_audioController
+                   error:&error];
+    if ( !reverb ) {
+        // Report error
+        NSLog(@"Error initializing reverb: %@",error.localizedDescription);
+    }
+    
+    AudioUnitSetParameter(reverb.audioUnit,
+                          kReverb2Param_DryWetMix,
+                          kAudioUnitScope_Global,
+                          0,
+                          100.f,
+                          0);
+    
+    [self.audioController addFilter:reverb toChannelGroup:self.channels[0]];
+//    [self.audioController addFilter:reverb toChannelGroup:self.channels[5]];
     
     initialized = true;
 }
@@ -212,11 +241,12 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
     }
     
     NSData *data = [msg dataUsingEncoding:NSUTF8StringEncoding];
-    [udpSocket sendData:data toHost:host port:port withTimeout:-1 tag:tag];
+//    [udpSocket sendData:data toHost:host port:port withTimeout:-1 tag:tag];
+    [tcpSocket writeData:data withTimeout:-1 tag:localTag];
     
-    NSLog(@"SENT (%i): %@", (int)tag, msg);
+    NSLog(@"SENT (%i): %@", (int)localTag, msg);
     
-    tag++;
+    localTag++;
 }
 
 - (NSData *)encodeAudioBufferList:(AudioBufferList *)abl {
@@ -305,7 +335,7 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
         NSUInteger startPos = 0;
         //Calculate the length of the subranges
         NSUInteger rangeLen = dataLen / numChannels;
-        NSLog(@"%lu,%d ->rangelen :  %lu %lu",(unsigned long)dataLen,numChannels,(unsigned long)rangeLen, sizeof(_ablArray));
+//        NSLog(@"%lu,%d ->rangelen :  %lu %lu",(unsigned long)dataLen,numChannels,(unsigned long)rangeLen, sizeof(_ablArray));
         //Create a uint32 version of the rangelength
         UInt32 rLen = (UInt32) rangeLen;
         
@@ -397,7 +427,7 @@ withFilterContext:(id)filterContext{
 }
 
 -(void)setupSocket{
-    tag = 0;
+    localTag = 0;
     udpSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
 //    udpSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
 //    udpSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0)];
@@ -416,6 +446,22 @@ withFilterContext:(id)filterContext{
     }
     
     NSLog(@"Socket Ready");
+}
+
+-(void)setupTCPSocket{
+    localTag = 0;
+    tcpSocket = [[GCDAsyncSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_main_queue()];
+
+    NSString *host = _tfIPAddress.text;
+    uint16_t port = [_tfPort.text intValue];
+    NSError *error = nil;
+    if (![tcpSocket connectToHost:host onPort:port error:&error])
+    {
+        NSLog(@"Error connecting: %@", error);
+    }
+//    NSData *data = [[NSData alloc]init];
+//    [tcpSocket readDataToData:data withTimeout:-1 tag:tag];
+//    [tcpSocket readDataWithTimeout:-1 tag:0];
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
@@ -447,7 +493,7 @@ withFilterContext:(id)filterContext{
     UIImage *image = [info valueForKey:UIImagePickerControllerOriginalImage];
     [lastImageTouched setImage:image];
     //Or you can get the image url from AssetsLibrary
-    NSURL *path = [info valueForKey:UIImagePickerControllerReferenceURL];
+//    NSURL *path = [info valueForKey:UIImagePickerControllerReferenceURL];
     
     [picker dismissViewControllerAnimated:YES completion:^{
     }];
@@ -462,5 +508,60 @@ withFilterContext:(id)filterContext{
     [self.view reloadInputViews];
 }
 
+-(void)socket:(GCDAsyncSocket *)sock didConnectToHost:(NSString *)host port:(uint16_t)port{
+    NSLog(@"socket:%p didConnectToHost:%@ port:%hu", sock, host, port);
+    [sock readDataWithTimeout:-1 tag:0];
+}
+
+-(void)socket:(GCDAsyncSocket *)sock didReadData:(NSData *)data withTag:(long)tag{
+    NSLog(@"socket:%p didReadData:withTag:%ld", sock, tag);
+    
+//    NSString *ack = [[NSString alloc] initWithFormat:@"received %li",tag];
+//    NSData *d = [ack dataUsingEncoding:NSUTF8StringEncoding];
+//    [sock writeData:d withTimeout:-1 tag:0];
+    
+    if(data.length == dataSize * numChannels){
+        [self decodeAudioBufferListMultiChannel:data];
+    } else {
+        NSString *msg = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        if (msg)
+        {
+            NSLog(@"RECV: %@", msg);
+            
+            NSArray *array = [msg componentsSeparatedByString:@":"];
+            if(!initialized){
+                numChannels = (int)array.count;
+                channelNames = [[NSMutableArray alloc]init];
+                [channelNames addObjectsFromArray:array];
+                
+                [self initializeAll];
+            } else if ((int)array.count == numChannels){
+                [self updateChannelNames:array];
+            } else if ([[array objectAtIndex:0] isEqual:@"image"]){
+                //Initialize standard image already on the phone
+                int index = [[array objectAtIndex:1] integerValue];
+                NSString *path = [[NSBundle mainBundle] pathForResource:[array objectAtIndex:2] ofType:[array objectAtIndex:3]];
+                UIImage *image = [[UIImage alloc] initWithContentsOfFile:path];
+                [[channelImageViews objectAtIndex:index] setImage:image];
+                [self.view reloadInputViews];
+            }
+        }
+    }
+    
+    int datalength = dataSize * numChannels;
+    
+//    [sock readDataToLength:dataSize*numChannels withTimeout:15 tag:0];
+    [sock readDataToLength:datalength withTimeout:-1 tag:0];
+//    [sock readDataWithTimeout:-1 tag:0];
+}
+
+-(void)socketDidDisconnect:(GCDAsyncSocket *)sock withError:(NSError *)err{
+    NSLog(@"Disconnected with error: %@", err.localizedDescription);
+}
+
+-(void)socket:(GCDAsyncSocket *)sock didWriteDataWithTag:(long)tag{
+    NSLog(@"Did write data with tag: %li",tag);
+   // [sock readDataWithTimeout:-1 tag:0];
+}
 
 @end

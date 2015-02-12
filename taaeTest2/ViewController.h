@@ -15,16 +15,17 @@
 #import <Accelerate/Accelerate.h>
 
 #import "GCDAsyncUdpSocket.h"
+#import "GCDAsyncSocket.h"
 
 //#import "MyAudioReceiver.h"
 #import "MyAudioPlayer.h"
 
 #import <dispatch/dispatch.h>
 
-@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate> {
+@interface ViewController : UIViewController<AEAudioReceiver, GCDAsyncUdpSocketDelegate, UITextFieldDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GCDAsyncSocketDelegate> {
     @public
     GCDAsyncUdpSocket *udpSocket;
-    long tag;
+    long localTag;
     int numChannels;
     NSMutableArray *channelNames;
     NSMutableArray *channelNameLabels;
@@ -37,6 +38,7 @@
     bool initialized;
     int imageFlag;
     UIImageView *lastImageTouched;
+    GCDAsyncSocket *tcpSocket;
 }
 
 @property (retain, nonatomic) AEAudioController *audioController;
@@ -78,6 +80,7 @@
 - (void) updateChannelNames:(NSArray*)names;
 
 -(void) setupSocket;
+-(void) setupTCPSocket;
 - (BOOL)textFieldShouldReturn:(UITextField *)textField;
 - (IBAction)clickedBackground;
 
