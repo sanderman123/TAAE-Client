@@ -20,7 +20,7 @@
     initialized = false;
     numChannels = 0;
     imageFlag = -1;
-//    [self setupSocket];
+    [self setupSocket];
     [self setupTCPSocket];
 }
 
@@ -183,8 +183,8 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
     }
     
     NSData *data = [msg dataUsingEncoding:NSUTF8StringEncoding];
-//    [udpSocket sendData:data toHost:host port:port withTimeout:-1 tag:tag];
-    [tcpSocket writeData:data withTimeout:-1 tag:localTag];
+    [udpSocket sendData:data toHost:host port:port withTimeout:-1 tag:0];
+//    [tcpSocket writeData:data withTimeout:-1 tag:localTag];
     
     NSLog(@"SENT (%i): %@", (int)localTag, msg);
     
@@ -283,13 +283,14 @@ withFilterContext:(id)filterContext{
             NSLog(@"RECV: %@", msg);
             
             NSArray *array = [msg componentsSeparatedByString:@":"];
-            if(!initialized){
-                numChannels = (int)array.count;
-                channelNames = [[NSMutableArray alloc]init];
-                [channelNames addObjectsFromArray:array];
-                
-                [self initializeAll];
-            } else if ((int)array.count == numChannels){
+//            if(!initialized){
+//                numChannels = (int)array.count;
+//                channelNames = [[NSMutableArray alloc]init];
+//                [channelNames addObjectsFromArray:array];
+//                
+//                [self initializeAll];
+//            } else
+            if ((int)array.count == numChannels){
                 [self updateChannelNames:array];
             } else if ([[array objectAtIndex:0] isEqual:@"image"]){
                 //Initialize standard image already on the phone
@@ -300,12 +301,13 @@ withFilterContext:(id)filterContext{
                 [self.view reloadInputViews];
             }
             
-        } else {
-            [self decodeAudioBufferListMultiChannel:data];
-            NSString *host = nil;
-            uint16_t port = 0;
-            [GCDAsyncUdpSocket getHost:&host port:&port fromAddress:address];
         }
+//        else {
+//            [self decodeAudioBufferListMultiChannel:data];
+//            NSString *host = nil;
+//            uint16_t port = 0;
+//            [GCDAsyncUdpSocket getHost:&host port:&port fromAddress:address];
+//        }
 //    }
     
 }
