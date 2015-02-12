@@ -6,10 +6,10 @@
 //  Copyright (c) 2015 Sander. All rights reserved.
 //
 
-#import "MyAudioPlayer.h"
+#import "ChannelPlayer.h"
 
 
-@implementation MyAudioPlayer
+@implementation ChannelPlayer
 
 -(instancetype)init{
     TPCircularBufferInit(&_cbuffer, 16384);
@@ -17,7 +17,7 @@
     return self;
 }
 
-static OSStatus renderCallback(__unsafe_unretained MyAudioPlayer *THIS,
+static OSStatus renderCallback(__unsafe_unretained ChannelPlayer *THIS,
                                __unsafe_unretained AEAudioController *audioController,
                                const AudioTimeStamp     *time,
                                UInt32                    frames,

@@ -11,7 +11,7 @@
 #import "TPCircularBuffer.h"
 #import "TPCircularBuffer+AudioBufferList.h"
 
-@interface MyAudioPlayer : NSObject<AEAudioPlayable>{
+@interface ChannelPlayer : NSObject<AEAudioPlayable>{
     
 }
 

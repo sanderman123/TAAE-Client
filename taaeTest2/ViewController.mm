@@ -26,26 +26,11 @@
 
 -(void)sliderAction:(UISlider*)sender
 {
-//    if ([sender isEqual:[sliders objectAtIndex:i]]) {
-        //set the volume
-    
-//    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(void){
-        //Background Thread
         float vol = sender.value;
         long sTag = sender.tag;
         NSLog(@"Slider: %li, value: %f",sTag, vol);
-        [self.audioController setVolume:vol forChannelGroup:self.channels[sTag]];
-//        dispatch_async(dispatch_get_main_queue(), ^(void){
-            //Run UI Updates
-            
-//        });
-//    });
-
-        //    }
-//    for(int i = 0; i < numChannels; i++){
-//        //Find the slider number equal to the sender
-//        
-//    }
+        [(MonitorChannel*)[self.channels objectAtIndex:sTag] setVolume:vol];
+//    [[self.channels objectAtIndex:sTag] setReverbValue:vol*100.f];
 }
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
@@ -61,38 +46,16 @@
     channelImageViews = [[NSMutableArray alloc]init];
     NSString *path = [[NSBundle mainBundle] pathForResource:@"music-note" ofType:@"png"];
     defaultImage = [[UIImage alloc] initWithContentsOfFile:path];
+    self.channels = [[NSMutableArray alloc]init];
+    channelNameLabels = [[NSMutableArray alloc] init];
+    sliders = [[NSMutableArray alloc] init];
     
-    for (int i = 0; i< numChannels; i++) {
-        AudioBufferManager *ablManager = [[AudioBufferManager alloc]init];
-        ablManager.buffer =AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
-        
-        //AudioBufferList *tmp = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);//(AudioBufferList *) malloc(ablSize*2);
-        [ablNSArray addObject:ablManager];
-    }
-    
-    
-    
-    //Make variables public so they can be reused
-    self.abl = (AudioBufferList*) malloc(sizeof(AudioBufferList));
-    self.abl->mNumberBuffers = numChannels;
-    //self.abl = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], 1024);
-    self.abl1 = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
-    self.abl2 = AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
-//    self.byteData = (Byte*) malloc(dataSize); //should maybe be a different value in the future
-//    self.byteData2 = (Byte*) malloc(dataSize); //should maybe be a different value in the future
     self.byteDataArray = (Byte *) malloc(dataSize*numChannels);
-//    self.ablArray = (AudioBufferList *) malloc(ablSize*numChannels*2);
     
-    //    self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleaved16BitStereoAudioDescription] inputEnabled: YES];
-    //    _audioController.preferredBufferDuration = 0.005;
-    //
     self.audioController = [[AEAudioController alloc] initWithAudioDescription:[AEAudioController nonInterleavedFloatStereoAudioDescription] inputEnabled:NO];
-//            _audioController.preferredBufferDuration = 0.005;
+//    _audioController.preferredBufferDuration = 0.005;
     _audioController.preferredBufferDuration = 0.0029;
 //    _audioController.preferredBufferDuration = 0.00145;
-//    [UIDevice currentDevice].proximityMonitoringEnabled = YES;
-    [[UIDevice currentDevice] setProximityMonitoringEnabled:YES];
-    NSLog(@"Proximity Monitoring Enabled? %@ ",    [UIDevice currentDevice].proximityMonitoringEnabled ? @"YES" : @"NO");
     
     NSError *error = [NSError alloc];
     if(![self.audioController start:&error]){
@@ -100,13 +63,12 @@
     }
     
     
-    sliders = [[NSMutableArray alloc] init];
-    
-    self.players = [[NSMutableArray alloc] init];
-    self.channels = (AEChannelGroupRef*)malloc(sizeof(AEChannelGroupRef)*numChannels*2);
-    channelNameLabels = [[NSMutableArray alloc] init];
-    
     for(int i = 0; i < numChannels; i++){
+        //Add an AudioBufferList for every channel
+        AudioBufferManager *ablManager = [[AudioBufferManager alloc]init];
+        ablManager.buffer =AEAllocateAndInitAudioBufferList([AEAudioController nonInterleavedFloatStereoAudioDescription], dataSize);
+        [ablNSArray addObject:ablManager];
+        
         //Initialize channel images
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(250.0, 130.0+i*60, 50.0, 50.0)];
         [imageView setImage:defaultImage];
@@ -139,41 +101,21 @@
         [sliders addObject:slider];
         [self.view addSubview:[sliders objectAtIndex:i]];
         
-        //Add channels and players
-        [self.players addObject:[[MyAudioPlayer alloc] init]];
-        self.channels[i] = [self.audioController createChannelGroup];
-        //add channel i with player i to the audio controller as a new channel
-        [self.audioController addChannels:[[NSArray alloc] initWithObjects:[self.players objectAtIndex:i], nil] toChannelGroup:self.channels[i]];
+        //Add a Channel Model for every channel
+        MonitorChannel* channel = [[MonitorChannel alloc]initWithAudioController:self.audioController];
+        [self.channels addObject:channel];
+        
+        NSArray* chnls = [self.audioController channels];
+        
         float vol = slider.value;
         //Initialize channel volumes
-        [self.audioController setVolume:vol forChannelGroup:self.channels[i]];
-    }
-//    [self.audioController setPan:1.0 forChannelGroup:self.channels[5]];
-//    [self.audioController setMuted:YES forChannelGroup:self.channels[5]];
-    
-    AudioComponentDescription component
-    = AEAudioComponentDescriptionMake(kAudioUnitManufacturer_Apple,
-                                      kAudioUnitType_Effect,
-                                      kAudioUnitSubType_Reverb2);
-    error = NULL;
-    AEAudioUnitFilter *reverb = [[AEAudioUnitFilter alloc]
-                   initWithComponentDescription:component
-                   audioController:_audioController
-                   error:&error];
-    if ( !reverb ) {
-        // Report error
-        NSLog(@"Error initializing reverb: %@",error.localizedDescription);
+        [(MonitorChannel*)[self.channels objectAtIndex:i] setVolume:vol];
+//        [self.audioController setVolume:vol forChannelGroup:[[self.channels objectAtIndex:i]getChannelGroup]];
     }
     
-    AudioUnitSetParameter(reverb.audioUnit,
-                          kReverb2Param_DryWetMix,
-                          kAudioUnitScope_Global,
-                          0,
-                          100.f,
-                          0);
-    
-    [self.audioController addFilter:reverb toChannelGroup:self.channels[0]];
-//    [self.audioController addFilter:reverb toChannelGroup:self.channels[5]];
+//    [UIDevice currentDevice].proximityMonitoringEnabled = YES;
+    [[UIDevice currentDevice] setProximityMonitoringEnabled:YES];
+    NSLog(@"Proximity Monitoring Enabled? %@ ",    [UIDevice currentDevice].proximityMonitoringEnabled ? @"YES" : @"NO");
     
     initialized = true;
 }
@@ -266,64 +208,6 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
     return self.mutableData;
 }
 
-- (AudioBufferList *)decodeAudioBufferList:(NSData *)data {
-    
-    if (data.length > 0) {
-        int nc = 2; // This value should be changed once there are more than 2 channels
-        
-        //AudioBufferList *abl = (AudioBufferList*) malloc(sizeof(AudioBufferList));
-        self.abl->mNumberBuffers = nc;
-        
-        NSUInteger len = [data length];
-        
-        //Take the range of the first buffer
-        NSUInteger olen = 0;
-        // NSUInteger lenx = len / nc;
-        NSUInteger step = len / nc;
-        int i = 0;
-        
-        while (olen < len) {
-            
-            //NSData *d = [NSData alloc];
-            NSData *pd = [data subdataWithRange:NSMakeRange(olen, step)];
-            NSUInteger l = [pd length];
-            NSLog(@"l: %lu",(unsigned long)l);
-//            Byte *byteData = (Byte*) malloc(l);
-            if(i == 0){
-                memcpy(self.byteData, [pd bytes], l);
-                if(self.byteData){
-                    
-                    //I think the zero should be 'i', but for some reason that doesn't work...
-                    self.abl->mBuffers[i].mDataByteSize = (UInt32)l;
-                    self.abl->mBuffers[i].mNumberChannels = 1;
-                    self.abl->mBuffers[i].mData = self.byteData;
-                    //                memcpy(&self.abl->mBuffers[i].mData, byteData, l);
-                }
-            } else {
-                memcpy(self.byteData2, [pd bytes], l);
-                if(self.byteData2){
-                    
-                    //I think the zero should be 'i', but for some reason that doesn't work...
-                    self.abl->mBuffers[i].mDataByteSize = (UInt32)l;
-                    self.abl->mBuffers[i].mNumberChannels = 1;
-                    self.abl->mBuffers[i].mData = self.byteData2;
-                    //                memcpy(&self.abl->mBuffers[i].mData, byteData, l);
-                }
-            }
-            
-            
-            //Update the range to the next buffer
-            olen += step;
-            //lenx = lenx + step;
-            i++;
-//            free(byteData);
-        }
-        return self.abl;
-    }
-    return nil;
-}
-
-
 -(void)decodeAudioBufferListMultiChannel:(NSData *)data {
     //We should do the initialization part at a different place:
 
@@ -372,7 +256,7 @@ static void inputCallback(__unsafe_unretained ViewController *THIS,
             //            self.ablArray[16*i].mBuffers[1].mData = &self.byteDataArray[dataSize*i];
             ablManager.buffer->mBuffers[1] = ablManager.buffer->mBuffers[0];
 
-            [[self.players objectAtIndex:i] addToBufferWithoutTimeStampAudioBufferList:ablManager.buffer];
+            [[[self.channels objectAtIndex:i] getChannelPlayer] addToBufferWithoutTimeStampAudioBufferList:ablManager.buffer];
             
             startPos += rangeLen;
         }
@@ -409,7 +293,7 @@ withFilterContext:(id)filterContext{
                 [self updateChannelNames:array];
             } else if ([[array objectAtIndex:0] isEqual:@"image"]){
                 //Initialize standard image already on the phone
-                int index = [[array objectAtIndex:1] integerValue];
+                long index = [[array objectAtIndex:1] integerValue];
                 NSString *path = [[NSBundle mainBundle] pathForResource:[array objectAtIndex:2] ofType:[array objectAtIndex:3]];
                 UIImage *image = [[UIImage alloc] initWithContentsOfFile:path];
                 [[channelImageViews objectAtIndex:index] setImage:image];
@@ -539,7 +423,7 @@ withFilterContext:(id)filterContext{
                 [self updateChannelNames:array];
             } else if ([[array objectAtIndex:0] isEqual:@"image"]){
                 //Initialize standard image already on the phone
-                int index = [[array objectAtIndex:1] integerValue];
+                long index = [[array objectAtIndex:1] integerValue];
                 NSString *path = [[NSBundle mainBundle] pathForResource:[array objectAtIndex:2] ofType:[array objectAtIndex:3]];
                 UIImage *image = [[UIImage alloc] initWithContentsOfFile:path];
                 [[channelImageViews objectAtIndex:index] setImage:image];

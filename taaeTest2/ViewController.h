@@ -18,7 +18,8 @@
 #import "GCDAsyncSocket.h"
 
 //#import "MyAudioReceiver.h"
-#import "MyAudioPlayer.h"
+
+#import "MonitorChannel.h"
 
 #import <dispatch/dispatch.h>
 
@@ -41,6 +42,14 @@
     GCDAsyncSocket *tcpSocket;
 }
 
+//------MVC classes------
+@property (nonatomic, strong) NSMutableArray* channels;
+
+
+//-----------------------
+
+
+
 @property (retain, nonatomic) AEAudioController *audioController;
 @property (nonatomic, strong) AEPlaythroughChannel *playthrough;
 @property (nonatomic, assign) TPCircularBuffer cb;
@@ -53,9 +62,6 @@
 //multichannel stuff
 @property (nonatomic) Byte *byteDataArray;
 @property (nonatomic) AudioBufferList *ablArray;
-@property (nonatomic) NSMutableArray* players;
-@property (nonatomic) AEChannelGroupRef* channels;
-
 @property (nonatomic) NSMutableData *mutableData;
 //@property (nonatomic) AudioBufferList *decodedAbl;
 
@@ -70,8 +76,6 @@
 -(void)sliderAction:(UISlider*)sender;
 
 - (NSData *) encodeAudioBufferList:(AudioBufferList *)abl;
-
-- (AudioBufferList *) decodeAudioBufferList: (NSData *) data;
 
 - (void) decodeAudioBufferListMultiChannel: (NSData *) data;
 
